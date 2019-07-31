@@ -1,43 +1,29 @@
 import numpy as np
 import argparse
-# import torch as th
-# from os import listdir
 import os
 import h5py
 import json
 from PIL import Image
 from utils import args
 from time import ctime
-# from torchvision import transforms
 
-Image.MAX_IMAGE_PIXELS = 1000000000
+Image.MAX_IMAGE_PIXELS = 1e10
 
 def get_args():
     parser = argparse.ArgumentParser(description="Data Preparation")
-    parser.add_argument("--data_dir", action="append", type=str)
-    parser.add_argument("--name", type=str, default="landslide.h5")
-    parser.add_argument("--save_to", type=str, default="../image_data/")
-    parser.add_argument("--feature_num", type=int, default=94)
-    parser.add_argument('--shape', action='append', type=args.shape)
-    parser.add_argument("--data_format", type=str, default=".tif")
-    parser.add_argument("--pad", type=int, default=64)
+    parser.add_argument("--data_dir", action="append", type=str, help="path to each region's data")
+    parser.add_argument("--save_to", type=str, default="../image_data/", help="path to write the new dataset")
+    parser.add_argument("--feature_num", type=int, default=94, help="number of total features/inputs")
+    parser.add_argument('--shape', action='append', type=args.shape, help="the shape of each region")
+    parser.add_argument("--data_format", type=str, default=".tif", help="format of the images to read from")
+    parser.add_argument("--pad", type=int, default=64, help="size of padding to each dimension")
     return parser.parse_args()
-
-def convert_nodata(np_img):
-    '''
-    convert a binary image with no data pts (value=127) to a binary image with no data values being the mean.
-    '''
-    data = np_img.all()==1 + np_img.all()==0
-    nodata = 1-data
-    mean = np.mean(np_img[data])
-    np_img[nodata] = mean
-    # import ipdb; ipdb.set_trace()
-    return np_img
 
 def normalize(np_img, f = 'slope'):
     if f == 'slope':
         np_img[np_img < 0] = 0
         np_img[np_img > 180] = 0
+        print('slope values smaller than zero and bigger than 180 are ignored.')
     mean = np.mean(np_img)
     std = np.std(np_img)
     print('mean, std before normalizing: %f, %f' %(mean, std))
@@ -46,54 +32,44 @@ def normalize(np_img, f = 'slope'):
     return np_img
 
 def zero_one(np_img):
-    # ones = np_img==1
     ones = np_img!=0
     np_img[ones]=1
     return np_img
 
 def initialize(f, key):
-    (n, h, w) = f[key]['train/data'].shape
-    (_, hg, wg) = f[key]['test/data'].shape
-    zero_train = np.zeros((h, w))
-    zero_test = np.zeros((hg, wg))
+    (n, h, w) = f[key]['data'].shape
+    zero = np.zeros((h, w))
     for i in range(n):
-        f[key]['train/data'][i] = zero_train
-        f[key]['test/data'][i] = zero_test
+        f[key]['data'][i] = zero
         print('%s -> %d/%d' %(ctime(), i+1, n), end='\r')
     return f
 
 def process_data():
+    '''
+    only use 10% of the one patches for test and 10% of the one batches for validation
+    so, we don't create separate partitions for train and test in the final dataset but only save the indices.
+    '''
     args = get_args()
     g = open('data_dict.json', 'r')
     data_dict = json.load(g)
     g.close()
-    f = h5py.File(args.save_to+args.name, 'a')
+    f = h5py.File(args.save_to, 'a')
     
     for data_path in args.data_dir:
         name = data_path.split('/')[-2]
         for n, h, w in args.shape:
-            # hv = h//5
-            nw = w//3
             if n == name and not name in f.keys():
                 f.create_dataset(
-                    name+'/test/data',
-                    (args.feature_num, h+args.pad*2, w-2*nw+args.pad*2),
+                    name+'/data',
+                    (args.feature_num, h+args.pad*2, w+args.pad*2),
                     dtype='f',
                     compression='lzf'
                 )
-                f.create_dataset(name+'/test/gt', (1, h+args.pad*2, w-2*nw+args.pad*2), dtype='f', compression='lzf')
-                f.create_dataset(
-                    name+'/train/data',
-                    (args.feature_num, h+args.pad*2, nw*2+args.pad*2),
-                    dtype='f',
-                    compression='lzf'
-                )
-                f.create_dataset(name+'/train/gt', (1, h+args.pad*2, nw*2+args.pad*2), dtype='f', compression='lzf')
+                f.create_dataset(name+'/gt', (1, h, w), dtype='f', compression='lzf')
                 print('created data and gt in %s' %name)
                 break
         f = initialize(f, name)
 
-    print(list(f.keys()))
     for data_path in args.data_dir:
         name = data_path.split('/')[-2]
         images = os.listdir(data_path)
@@ -108,13 +84,14 @@ def process_data():
                     print('normalizing DEM')
                     t = normalize(t, 'DEM')
                 print(data_dict[n_])
-                wlen = t.shape[1]//3
-                f[name+'/train/data'][int(data_dict[n_])] = np.pad(t[:, 0:2*wlen], args.pad, 'reflect')
-                f[name+'/test/data'][int(data_dict[n_])] = np.pad(t[:, 2*wlen:], args.pad, 'reflect')
+                t = np.pad(t, ((0, 0), (0, 250)), mode='reflect')
+                f[name+'/data'][int(data_dict[n_])] = np.pad(
+                    t,
+                    ((args.pad, args.pad), (args.pad, args.pad)),
+                    'reflect'
+                )
         gt = np.array(Image.open(data_path+'gt'+args.data_format))
-        wlen = gt.shape[1]//3
-        f[name+'/train/gt'][0] = np.pad(gt[:, 0:2*wlen], args.pad, 'reflect')
-        f[name+'/test/gt'][0] = np.pad(gt[:, 2*wlen:], args.pad, 'reflect')
+        f[name+'/gt'][0] = np.pad(gt, ((0, 0), (0, 250)), mode='reflect')
 
     f.close()
 
