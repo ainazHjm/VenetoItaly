@@ -10,6 +10,7 @@ def get_args():
     parser.add_argument('--region', type=str, default='Veneto')
     parser.add_argument('--write_ones', type=bool, default=False)
     parser.add_argument('--save_to', type=str)
+    parser.add_argument('--oversample_ratio', type=int, default=5)
     return parser.parse_args()
 
 def find_one_patches(args):
@@ -50,8 +51,17 @@ def partition(args, ones, zeros):
     print(test.shape)
     validation = ones[n_idx//20:3*(n_idx//20)]
     print(validation.shape)
+    n_ones = np.repeat(
+        ones[3*(n_idx//20):],
+        [args.oversample_ratio for _ in range(ones[3*(n_idx//20):].shape[0])],
+        axis=0
+    )
+    train = np.concatenate((n_ones, zeros[n_idx//20:]), axis=0)
+    print(train.shape)
     np.save(args.save_to+'{}_test_indices.npy'.format(args.region), test)
     np.save(args.save_to+'{}_validation_indices.npy'.format(args.region), validation)
+    np.save(args.save_to+'{}_train_indices.npy'.format(args.region), train)
+    np.save(args.save_to+'{}_data_indices.npy'.format(args.region), np.concatenate((ones, zeros), axis=0))
 
 def main():
     args = get_args()
