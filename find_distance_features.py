@@ -47,9 +47,9 @@ def get_max_val(max_indices, mask, feature):
     for i in range(len(mask_indices[0])):
         r, c = mask_indices[0][i]-mask_center[0], mask_indices[1][i]-mask_center[1]
         if c >=0:
-            n_feature[i, :, :] = np.pad(feature[r:, c:], ((0, r), (0, c)), mode='constant') if r>=0 else np.pad(feature[:r, c:], ((r, 0), (0, c)), mode='constant')
+            n_feature[i, :, :] = np.pad(feature[r:, c:], ((0, r), (0, c)), mode='constant') if r>=0 else np.pad(feature[:r, c:], ((-1*r, 0), (0, c)), mode='constant')
         else:
-            n_feature[i, :, :] = np.pad(feature[r:, :c], ((0, r), (c, 0)), mode='constant') if r>=0 else np.pad(feature[:r, :c], ((r, 0), (c, 0)), mode='constant')
+            n_feature[i, :, :] = np.pad(feature[r:, :c], ((0, r), (-1*c, 0)), mode='constant') if r>=0 else np.pad(feature[:r, :c], ((-1*r, 0), (-1*c, 0)), mode='constant')
     n_feature = n_feature.reshape(len(mask_indices[0]), -1)
     max_features = n_feature[max_indices, np.arange(h*w)]
     return max_features.reshape(h, w)
