@@ -1,6 +1,7 @@
 import h5py
 import argparse
 import numpy as np
+import resource
 from utils.args import int_array
 from time import ctime
 
@@ -73,26 +74,29 @@ def initialize(args, newf, f):
     for feature_idx in range(n-1):
         newf[args.region]['data'][feature_idx, :, :] = f[args.region]['data'][
             feature_idx,
-            args.pad:-args.pad,
-            args.pad:-args.pad
+            :,
+            :
+            # args.pad:-args.pad,
+            # args.pad:-args.pad
         ]
         print('[%s]: writing feature %d' %(ctime(), feature_idx))
     starting_idx = n-1
     for dist in args.dist:
         newf = write_file(args, f, dist, newf, starting_idx)
-        starting_idx += n
+        starting_idx += (n-1)
     newf[args.region]['gt'][:] = f[args.region]['gt'][:]
     print('[%s]: writing gt' %ctime())
     return newf
 
 def create_dataset(args, f):
-    (_, h, w) = f[args.region]['gt'].shape
+    (_, h_data, w_data) = f[args.region]['data'].shape
+    (_, h_gt, w_gt) = f[args.region]['gt'].shape
     n = f[args.region]['data'].shape[0]
     total_features = (len(args.dist)+1)*(n-1)
-    print('[%s]: total number of features: %d, shape= (%d, %d)' %(ctime(), total_features, h, w))
+    print('[%s]: total number of features: %d, data shape= (%d, %d)' %(ctime(), total_features, h_data, w_data))
     newf = h5py.File(args.save_to, 'w')
-    newf.create_dataset(args.region+'/data', shape=(total_features, h, w))
-    newf.create_dataset(args.region+'/gt', shape=(1, h, w))
+    newf.create_dataset(args.region+'/data', shape=(total_features, h_data, w_data))
+    newf.create_dataset(args.region+'/gt', shape=(1, h_gt, w_gt))
     print('[%s]: the new dataset is created' %(ctime()))
     newf = initialize(args, newf, f)
     newf.close()
@@ -109,3 +113,5 @@ def main():
     
 if __name__=='__main__':
     main()
+    mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    print('memory usage: %d (KB)' % mem)
