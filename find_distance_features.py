@@ -24,6 +24,7 @@ def create_mask(args, dist):
     return mask
 
 def find_max_idx(dem, mask):
+    print('finding the maximum index')
     (h, w) = dem.shape
     mask_center = (mask.shape[0]//2, mask.shape[1]//2)
     mask_indices = mask.nonzero()
@@ -40,6 +41,7 @@ def find_max_idx(dem, mask):
     return max_indices # a 1d array
 
 def get_max_val(max_indices, mask, feature):
+    print('finding the maximum value corresponding to the found index.')
     (h, w) = feature.shape
     mask_indices = mask.nonzero()
     mask_center = (mask.shape[0]//2, mask.shape[1]//2)
@@ -109,9 +111,11 @@ def helper(args):
 
 def main():
     args = get_args()
+    print('parsed the arguments.')
     helper(args)
     
 if __name__=='__main__':
+    print('calling main')
     main()
     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     print('memory usage: %d (KB)' % mem)
