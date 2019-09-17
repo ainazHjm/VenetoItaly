@@ -21,6 +21,8 @@ def create_mask(args, dist):
     center = (radius, radius)
     distance = np.sqrt((Y-center[1])**2 + (X-center[0])**2)
     mask = np.logical_and(distance <= radius, distance >= radius-1)
+    if mask[radius, radius]:
+        mask[radius, radius] = False
     return mask
 
 def find_max_idx(dem, mask):
