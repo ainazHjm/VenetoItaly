@@ -138,9 +138,11 @@ def helper(args):
 
 def main():
     args = get_args()
+    print('parsed the arguments.')
     helper(args)
     
 if __name__=='__main__':
+    print('calling main')
     main()
     mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     print('memory usage: %d (KB)' % mem)
