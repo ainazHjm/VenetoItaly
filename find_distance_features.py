@@ -2,7 +2,9 @@ import h5py
 import argparse
 import numpy as np
 import resource
+import gc
 from utils.args import int_array
+from utils.masks import mask_helper
 from time import ctime
 
 def get_args():
@@ -13,19 +15,28 @@ def get_args():
     parser.add_argument('--region', type=str, default='Veneto')
     parser.add_argument('--save_to', type=str, default='/home/ainaz/Projects/Landslides/image_data/n_feature_data.h5')
     parser.add_argument('--pad', type=int, default=64)
+    parser.add_argument('--features', type=int_array, default=[0,2,3,5,6,8,11,12,15,19,20,25,35,45,46,47,51,70,78,86,91,92])
     return parser.parse_args()
 
-def create_mask(args, dist):
-    radius = dist//args.pix_res
-    Y, X = np.ogrid[:(2*radius+1), :(2*radius+1)]
-    center = (radius, radius)
-    distance = np.sqrt((Y-center[1])**2 + (X-center[0])**2)
-    mask = np.logical_and(distance <= radius, distance >= radius-1)
-    if mask[radius, radius]:
-        mask[radius, radius] = False
+def create_mask(args, dist, efficiency=True):
+    print('creating the mask')
+    if efficiency:
+        mask = mask_helper()[str(dist)]
+    else:
+        radius = dist//args.pix_res
+        Y, X = np.ogrid[:(2*radius+1), :(2*radius+1)]
+        center = (radius, radius)
+        distance = np.sqrt((Y-center[1])**2 + (X-center[0])**2)
+        mask = np.logical_and(distance <= radius, distance >= radius-1)
+        if mask[radius, radius]:
+            mask[radius, radius] = False
+        print(mask)
     return mask
 
 def find_max_idx(dem, mask):
+    print('finding the indices for maximum elevation')
+    gc.collect()
+    # import ipdb; ipdb.set_trace()
     (h, w) = dem.shape
     mask_center = (mask.shape[0]//2, mask.shape[1]//2)
     mask_indices = mask.nonzero()
@@ -38,10 +49,12 @@ def find_max_idx(dem, mask):
         else:
             n_dem[i, :, :] = np.pad(dem[row:, :col], ((0, row), (-1*col, 0)), mode='constant') if row>=0 else np.pad(dem[:row, :col], ((-1*row, 0), (-1*col, 0)), mode='constant')
     n_dem = n_dem.reshape(len(mask_indices[0]), -1)
-    max_indices = np.argmax(n_dem, axis=0)
-    return max_indices # a 1d array
+    gc.collect()
+    # import ipdb; ipdb.set_trace()
+    return np.argmax(n_dem, axis=0) # a 1d array
 
 def get_max_val(max_indices, mask, feature):
+    print('finding the maximum values corresponding to indices')
     (h, w) = feature.shape
     mask_indices = mask.nonzero()
     mask_center = (mask.shape[0]//2, mask.shape[1]//2)
@@ -56,36 +69,39 @@ def get_max_val(max_indices, mask, feature):
     max_features = n_feature[max_indices, np.arange(h*w)]
     return max_features.reshape(h, w)
 
-def write_file(args, f, radius, new_f, starting_idx):
+def write_file(args, f, radius, new_f, radius_num):
     (n, _, _) = f[args.region]['data'].shape
     dem = f[args.region]['data'][-1, :, :] # load_the elevation map
     mask = create_mask(args, radius)
-    # import ipdb; ipdb.set_trace()
+    import ipdb; ipdb.set_trace() 
     max_idx = find_max_idx(dem, mask) # returns a 1d array showing which channel is the max value
-    for feature_num in range(n-1):
-        new_f[args.region]['data'][starting_idx+feature_num, :, :] = get_max_val(
+    gc.collect()
+    print('-- memory usage after finding the index: %d (KB)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+    for i, feature_num in enumerate(args.features):
+        new_f[args.region]['data/dist{}'.format(str(radius_num))][i, :, :] = get_max_val(
             max_idx,
             mask,
             f[args.region]['data'][feature_num, :, :]
         )
-        print('[%s]: writing feature %d' %(ctime(), starting_idx+feature_num))
+        print('[%s]: writing feature %d to the new dataset' %(ctime(), feature_num))
+        print('-- memory usage: %d (KB)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     return new_f
 
 def initialize(args, newf, f):
     n = f[args.region]['data'].shape[0]
-    for feature_idx in range(n-1):
-        newf[args.region]['data'][feature_idx, :, :] = f[args.region]['data'][
+    for feature_idx in range(n-1): # dist 0
+        newf[args.region]['data/dist0'][feature_idx, :, :] = f[args.region]['data'][
             feature_idx,
             :,
             :
-            # args.pad:-args.pad,
-            # args.pad:-args.pad
         ]
         print('[%s]: writing feature %d' %(ctime(), feature_idx))
-    starting_idx = n-1
-    for dist in args.dist:
-        newf = write_file(args, f, dist, newf, starting_idx)
-        starting_idx += (n-1)
+    print('-- memory usage: %d (KB)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    print(args.features)
+    for i, dist in enumerate(args.dist):
+        newf = write_file(args, f, dist, newf, i+1)
+    print('-- memory usage: %d (KB)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     newf[args.region]['gt'][:] = f[args.region]['gt'][:]
     print('[%s]: writing gt' %ctime())
     return newf
@@ -94,12 +110,23 @@ def create_dataset(args, f):
     (_, h_data, w_data) = f[args.region]['data'].shape
     (_, h_gt, w_gt) = f[args.region]['gt'].shape
     n = f[args.region]['data'].shape[0]
-    total_features = (len(args.dist)+1)*(n-1)
-    print('[%s]: total number of features: %d, data shape= (%d, %d)' %(ctime(), total_features, h_data, w_data))
-    newf = h5py.File(args.save_to, 'w')
-    newf.create_dataset(args.region+'/data', shape=(total_features, h_data, w_data))
-    newf.create_dataset(args.region+'/gt', shape=(1, h_gt, w_gt))
+    # total_features = (len(args.dist)+1)*(n-1)
+    print('[%s]: total number of features: %d, data shape= (%d, %d)' %(ctime(), n-1+len(args.features)*len(args.dist), h_data, w_data))
+    newf = h5py.File(args.save_to, 'a')
+
+    # instead of having data and gt as group names, use dist{} for each feature group
+    newf.create_dataset(args.region+'/data/dist0', shape=(n-1, h_data, w_data),  dtype='f', compression='gzip')
+    for i in range(len(args.dist)):
+        newf.create_dataset(
+            args.region+'/data/dist{}'.format(str(i+1)),
+            shape=(len(args.features), h_data, w_data),
+            dtype='f',
+            compression='gzip'
+        )
+    newf.create_dataset(args.region+'/gt', shape=(1, h_gt, w_gt),  dtype='f', compression='gzip')
     print('[%s]: the new dataset is created' %(ctime()))
+    print('-- memory usage: %d (KB)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    
     newf = initialize(args, newf, f)
     newf.close()
     print('[%s]: new dataset has been created, initialized and saved.' %(ctime()))
