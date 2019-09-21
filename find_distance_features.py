@@ -144,13 +144,13 @@ def write_file(args, f, radius, new_f, radius_num):
 
 def initialize(args, newf, f):
     n = f[args.region]['data'].shape[0]
-    # for feature_idx in range(n-1): # dist 0
-    #     newf[args.region]['data/dist0'][feature_idx, :, :] = f[args.region]['data'][
-    #         feature_idx,
-    #         :,
-    #         :
-    #     ]
-    #     print('[%s]: writing feature %d' %(ctime(), feature_idx))
+    for feature_idx in range(n-1): # dist 0
+        newf[args.region]['data/dist0'][feature_idx, :, :] = f[args.region]['data'][
+            feature_idx,
+            :,
+            :
+        ]
+        print('[%s]: writing feature %d' %(ctime(), feature_idx))
     print('-- memory usage: %d (KB)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     print(args.features)
     for i, dist in enumerate(args.dist):
@@ -169,15 +169,15 @@ def create_dataset(args, f):
     newf = h5py.File(args.save_to, 'a')
 
     # instead of having data and gt as group names, use dist{} for each feature group
-    # newf.create_dataset(args.region+'/data/dist0', shape=(n-1, h_data, w_data),  dtype='f', compression='gzip')
-    # for i in range(len(args.dist)):
-    #     newf.create_dataset(
-    #         args.region+'/data/dist{}'.format(str(i+1)),
-    #         shape=(len(args.features), h_data, w_data),
-    #         dtype='f',
-    #         compression='gzip'
-    #     )
-    # newf.create_dataset(args.region+'/gt', shape=(1, h_gt, w_gt),  dtype='f', compression='gzip')
+    newf.create_dataset(args.region+'/data/dist0', shape=(n-1, h_data, w_data),  dtype='f', compression='gzip')
+    for i in range(len(args.dist)):
+        newf.create_dataset(
+            args.region+'/data/dist{}'.format(str(i+1)),
+            shape=(len(args.features), h_data, w_data),
+            dtype='f',
+            compression='gzip'
+        )
+    newf.create_dataset(args.region+'/gt', shape=(1, h_gt, w_gt),  dtype='f', compression='gzip')
     print('[%s]: the new dataset is created' %(ctime()))
     print('-- memory usage: %d (KB)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     
