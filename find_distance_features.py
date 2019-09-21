@@ -33,21 +33,56 @@ def create_mask(args, dist, efficiency=True):
         print(mask)
     return mask
 
-def find_max_idx(dem, mask):
+def find_max_idx(args, f, mask):
     print('finding the indices for maximum elevation')
     gc.collect()
-    # import ipdb; ipdb.set_trace()
+    dem = f[args.region]['data'][-1, :, :] # load_the elevation map
     (h, w) = dem.shape
     mask_center = (mask.shape[0]//2, mask.shape[1]//2)
     mask_indices = mask.nonzero()
+    # n_dem = np.zeros((len(mask_indices[0])*h, w))
     n_dem = np.zeros((len(mask_indices[0]), h, w))
     for i in range(len(mask_indices[0])):
         row, col = mask_indices[0][i]-mask_center[0], mask_indices[1][i]-mask_center[1]
-        # import ipdb; ipdb.set_trace()
-        if col >=0:
-            n_dem[i, :, :] = np.pad(dem[row:, col:], ((0, row), (0, col)), mode='constant') if row>=0 else np.pad(dem[:row, col:], ((-1*row, 0), (0, col)), mode='constant')
+
+        if col>0:
+            # n_dem[i, :, :] = np.pad(dem[row:, col:], ((0, row), (0, col)), mode='constant') if row>=0 else np.pad(dem[:row, col:], ((-1*row, 0), (0, col)), mode='constant')
+            if row>0:
+                n_dem[i, :-row, :-col] = dem[row:, col:]
+                # n_dem[i*h:(i+1)*h-row, :-col] = dem[row:, col:]
+            elif row<0:
+                n_dem[i, -1*row:, :-col] = dem[:row, col:]
+                # n_dem[i*h+(-1*row):(i+1)*h, :-col] = dem[:row, col:]
+            else:
+                n_dem[i, :, :-col] = dem[:, col:]
+                # n_dem[i*h:(i+1)*h, :-col] = dem[:, col:]
+
+        elif col<0:
+            # n_dem[i, :, :] = np.pad(dem[row:, :col], ((0, row), (-1*col, 0)), mode='constant') if row>=0 else np.pad(dem[:row, :col], ((-1*row, 0), (-1*col, 0)), mode='constant')
+            if row>0:
+                n_dem[i, :-row, -1*col:] = dem[row:, :col]
+                # n_dem[i*h:(i+1)*h-row, -1*col:] = dem[row:, :col]
+            elif row<0:
+                n_dem[i, -1*row:, -1*col:] = dem[:row, :col]
+                # n_dem[i*h+(-1*row):(i+1)*h, -1*col:] = dem[:row, :col]
+            else:
+                n_dem[i, :, -1*col:] = dem[:, :col]
+                # n_dem[i*h:(i+1)*h, -1*col:] = dem[:, :col]
+
         else:
-            n_dem[i, :, :] = np.pad(dem[row:, :col], ((0, row), (-1*col, 0)), mode='constant') if row>=0 else np.pad(dem[:row, :col], ((-1*row, 0), (-1*col, 0)), mode='constant')
+            if row>0:
+                n_dem[i, :-row, :] = dem[row:, :]
+                # n_dem[i*h:(i+1)*h-row, :] = dem[row:, :]
+            elif row<0:
+                n_dem[i, -1*row:, :] = dem[:row, :]
+                # n_dem[i*h+(-1*row):(i+1)*h, :] = dem[:row, :]
+            else:
+                n_dem[i, :, :] = dem[:, :]
+                # n_dem[i*h:(i+1)*h, :] = dem[:, :]
+                print('something is not right when getting the indices')
+
+    # import ipdb; ipdb.set_trace()
+    del dem, f
     n_dem = n_dem.reshape(len(mask_indices[0]), -1)
     gc.collect()
     # import ipdb; ipdb.set_trace()
@@ -60,21 +95,40 @@ def get_max_val(max_indices, mask, feature):
     mask_center = (mask.shape[0]//2, mask.shape[1]//2)
     n_feature = np.zeros((len(mask_indices[0]), h, w))
     for i in range(len(mask_indices[0])):
-        r, c = mask_indices[0][i]-mask_center[0], mask_indices[1][i]-mask_center[1]
-        if c >=0:
-            n_feature[i, :, :] = np.pad(feature[r:, c:], ((0, r), (0, c)), mode='constant') if r>=0 else np.pad(feature[:r, c:], ((-1*r, 0), (0, c)), mode='constant')
+        row, col = mask_indices[0][i]-mask_center[0], mask_indices[1][i]-mask_center[1]
+        if col>0:
+            # n_feature[i, :, :] = np.pad(feature[r:, c:], ((0, r), (0, c)), mode='constant') if r>=0 else np.pad(feature[:r, c:], ((-1*r, 0), (0, c)), mode='constant')
+            if row>0:
+                n_feature[i, :-row, :-col] = feature[row:, col:]
+            elif row<0:
+                n_feature[i, -1*row:, :-col] = feature[:row, col:]
+            else:
+                n_feature[i, :, :-col] = feature[:, col:]
+        elif col<0:
+            # n_feature[i, :, :] = np.pad(feature[r:, :c], ((0, r), (-1*c, 0)), mode='constant') if r>=0 else np.pad(feature[:r, :c], ((-1*r, 0), (-1*c, 0)), mode='constant')
+            if row>0:
+                n_feature[i, :-row, -1*col:] = feature[row:, :col]
+            elif row<0:
+                n_feature[i, -1*row:, -1*col:] = feature[:row, :col]
+            else:
+                n_feature[i, :, -1*col:] = feature[:, :col]
         else:
-            n_feature[i, :, :] = np.pad(feature[r:, :c], ((0, r), (-1*c, 0)), mode='constant') if r>=0 else np.pad(feature[:r, :c], ((-1*r, 0), (-1*c, 0)), mode='constant')
+            if row>0:
+                n_feature[i, :-row, :] = feature[row:, :]
+            elif row<0:
+                n_feature[i, -1*row:, :] = feature[:row, :]
+            else:
+                n_feature[i, :, :] = feature[:, :]
+
     n_feature = n_feature.reshape(len(mask_indices[0]), -1)
     max_features = n_feature[max_indices, np.arange(h*w)]
     return max_features.reshape(h, w)
 
 def write_file(args, f, radius, new_f, radius_num):
     (n, _, _) = f[args.region]['data'].shape
-    dem = f[args.region]['data'][-1, :, :] # load_the elevation map
+    # dem = f[args.region]['data'][-1, :, :] # load_the elevation map
     mask = create_mask(args, radius)
-    import ipdb; ipdb.set_trace() 
-    max_idx = find_max_idx(dem, mask) # returns a 1d array showing which channel is the max value
+    max_idx = find_max_idx(args, f, mask) # returns a 1d array showing which channel is the max value
     gc.collect()
     print('-- memory usage after finding the index: %d (KB)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
@@ -90,13 +144,13 @@ def write_file(args, f, radius, new_f, radius_num):
 
 def initialize(args, newf, f):
     n = f[args.region]['data'].shape[0]
-    for feature_idx in range(n-1): # dist 0
-        newf[args.region]['data/dist0'][feature_idx, :, :] = f[args.region]['data'][
-            feature_idx,
-            :,
-            :
-        ]
-        print('[%s]: writing feature %d' %(ctime(), feature_idx))
+    # for feature_idx in range(n-1): # dist 0
+    #     newf[args.region]['data/dist0'][feature_idx, :, :] = f[args.region]['data'][
+    #         feature_idx,
+    #         :,
+    #         :
+    #     ]
+    #     print('[%s]: writing feature %d' %(ctime(), feature_idx))
     print('-- memory usage: %d (KB)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     print(args.features)
     for i, dist in enumerate(args.dist):
@@ -115,15 +169,15 @@ def create_dataset(args, f):
     newf = h5py.File(args.save_to, 'a')
 
     # instead of having data and gt as group names, use dist{} for each feature group
-    newf.create_dataset(args.region+'/data/dist0', shape=(n-1, h_data, w_data),  dtype='f', compression='gzip')
-    for i in range(len(args.dist)):
-        newf.create_dataset(
-            args.region+'/data/dist{}'.format(str(i+1)),
-            shape=(len(args.features), h_data, w_data),
-            dtype='f',
-            compression='gzip'
-        )
-    newf.create_dataset(args.region+'/gt', shape=(1, h_gt, w_gt),  dtype='f', compression='gzip')
+    # newf.create_dataset(args.region+'/data/dist0', shape=(n-1, h_data, w_data),  dtype='f', compression='gzip')
+    # for i in range(len(args.dist)):
+    #     newf.create_dataset(
+    #         args.region+'/data/dist{}'.format(str(i+1)),
+    #         shape=(len(args.features), h_data, w_data),
+    #         dtype='f',
+    #         compression='gzip'
+    #     )
+    # newf.create_dataset(args.region+'/gt', shape=(1, h_gt, w_gt),  dtype='f', compression='gzip')
     print('[%s]: the new dataset is created' %(ctime()))
     print('-- memory usage: %d (KB)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     
