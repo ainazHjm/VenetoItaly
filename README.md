@@ -86,7 +86,38 @@ The data is free to use, modify, and share under CC BY-NC-SA 3.0 IT License.
 For more information refere to https://creativecommons.org/licenses/by-nc-sa/3.0/it/deed.en.
 
 ## How to Create hdf5 Dataset
+The hdf5 datasets that are created in this repository are used to train the models proposed by the paper: "Predicing Landslides Using Contour-Aligning Convolutional Neural Networks". However, the data can be used for training any other type of model.
+
+### Main Dataset
+The main dataset, consisting of 94 features in total (DEM, land cover, rock type, rock age, rock family, and slope), can be used for any type of model. All the features in the dataset with their corresponding feature number in the data are stored in 
+the `data_dict.json` file.
+
+#### Arguments
+* `data_dir`: The path to the region's raw image files that we previously downloaded (In our case we only have one region that is Veneto).
+* `save_to`: The path to save the hdf5 dataset.
+* `feature_num`: The number of total features. The default value is 94 but you can use any number of features that you want.
+* `shape`: This argument is an array of form "name,height,width". "name" is the name of the region (e.g. Veneto), "height,width" represents the image shape (all maps/rasters should have the same shape).
+* `data_format`: The format of the rasters. The default value is '.tif' and is recommend to use.
+* `pad`: The number of pixels used to pad each side of the image. This padding number is used later for loading the data coherently but is not necessary to do. You can pass this to be zero if you do not want to pad your images.
+
+#### Run
+To get the h5py dataset, simply pass the required arguments and call preprocess.py:
+
+`python3 preprocess.py --data_dir <path to raw data/rasters> --save_to <path to save the hdf5 dataset> --feature_num <feature_num> --shape <region_name,height,width> --data_format <data format> --pad <padding number>`
+
+### Dist Dataset
+This dataset is specifically for the LACNN model proposed in paper: "Predicing Landslides Using Contour-Aligning Convolutional Neural Networks". Only create this dataset if you want to re-implement or build on the LACNN model. Otherwise, use the main dataset.
+
+#### Arguments
+* `data_path`: The path to the main dataset of hdf5 format (This data can be generated from previous section).
+* `dist`: The distances that are going to be looked at in order to find the features at highest elevation value (refer to Figure 1 in the paper).
+* `region`: The name of the region you got the data for. In our case it is Veneto.
+* `save_to`: The path to save the new dataset.
+* `pad`: The padding number to pad the data with.
+* `features`: This argument is an array of integers that show which features you want to extract when you find the highest elevation value at some distance. The deafult value is chosen based on the weights of a linear regression model (top 21 features are chosen).
+
+#### Run
+To create the dist dataset, simply run find_dist_features.py with the arguments specified in the arguments section. The code uses a lot of memory if the distances are big. The current code only contains masks for 30, 100, and 300 pixels (x10 meters). If your memory is below 32G, only run it with `--dist 30`.
 
 ## LICENSE
-
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc-sa/3.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/3.0/">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License</a>.
