@@ -82,11 +82,11 @@ binary raster using GIS software.
 Hungr, O., Leroueil, S. & Picarelli, L. The Varnes classification of landslide types, an update. Landslides 11, 167–194 (2014). https://doi.org/10.1007/s10346-013-0436-y
 
 #### Terms and Conditions of Use:
-The data is free to use, modify, and share under CC BY-SA 3.0 IT License. 
-For more information refere to https://creativecommons.org/licenses/by-sa/3.0/it/.
+The data is free to use, modify, and share under CC BY-NC-SA 3.0 IT License. 
+For more information refere to https://creativecommons.org/licenses/by-nc-sa/3.0/it/deed.en.
 
 ## How to Create hdf5 Dataset
 
 ## LICENSE
 
-<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 License</a>.
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/3.0/">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License</a>.
