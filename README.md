@@ -8,24 +8,15 @@ and landslide polygons (labels) for Veneto, a region in Italy. To learn more abo
 
 1. Download the pre-proccessed dataset from https://drive.google.com/open?id=1mCkOdh3kAR8JHnAvahXeoosBu5lvVKMS that is in hdf5 format. This dataset consists of two nested keys:
     1. 'Veneto/data', which is of shape (n, h, w) where n is the total number of features in the data. The features include rock-type, rock-age, rock-family, and land cover classes. Refer to tables folder for more information about the features.
-    
     2. 'Veneto/gt', which includes landslide polygons that can be used as labels and is of shape (1, h', w'). This is a binary image; ones show landslides and zeros represent non-landslide points. Out of region areas have a negative value.
-
 2. Submit a request to download the DEM map by sending an email to `simone.tarquini@ingv.it` with a subject of TINITALY DEM.
-
 3. [Optional] Create a slope map based on the newly downloaded DEM using a GIS software.
-
 4. Add the newly downloaded DEM to the current existing hdf5 dataset. If you get the slope map, you will need to add it to the dataset as well:
     1. Create a new empty hdf5 dataset with the same keys (*'Veneto/data'* & *'Veneto/gt'*). The *data* part should have a shape of `(n+1, h, w)` if you only downloaded DEM otherwise, `(n+2, h, w)` to account for both slope and DEM. The *gt* part, ground truth, is the same shape as before.
-    
     2. Copy the *gt* from the previous dataset to the new created hdf5 dataset.
-    
-    3. Depending on where you want to put DEM (or both DEM and slope) in the new hdf5 dataset, update the `data_dict.json` file so that it represents your features correctly. In the current existing file, slope is the first feature (0<sup>th</sup> index) and DEM is the last feature (93<sup>th</sup> index).
-    
-    4. After updating `data_dict.json`, copy DEM (or both DEM and slope) to its (their) corresponding position in the new hdf5 dataset. If the index for DEM is `i` in the json file, copy DEM to index `(i, h, w)` in the new hdf5 dataset.
-    
+    3. Depending on where you want to put DEM (or both DEM and slope) in the new hdf5 dataset, update the `data_dict.json` file so that it represents your features correctly. In the current existing file, slope is the first feature (0<sup>th</sup> index) and DEM is the last feature (93<sup>th</sup> index).    
+    4. After updating `data_dict.json`, copy DEM (or both DEM and slope) to its (their) corresponding position in the new hdf5 dataset. If the index for DEM is `i` in the json file, copy DEM to index `(i, h, w)` in the new hdf5 dataset.    
     5. Copy the rest of the data from the previous hdf5 dataset to the new hdf5 dataset.
-    
     6. The new hdf5 dataset is now ready to be used in your experiments.
 
 For more information on hdf5 datasets, refer to http://docs.h5py.org/en/stable/. You will find feature names such as *litho_44* in `data_dict.json`; the number, in this case 44, corresponds to the INSPIRE code assigned to that type of rock. All feature names with their corresponding INSPIRE codes are available in the *tables* folder.
