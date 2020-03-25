@@ -7,7 +7,7 @@ and landslide polygons (labels) for Veneto, a region in Italy. To learn more abo
 ## Step by Step Instructions (Recommended)
 
 1. Download the pre-proccessed dataset from https://drive.google.com/open?id=1mCkOdh3kAR8JHnAvahXeoosBu5lvVKMS that is in hdf5 format. This dataset consists of two nested keys:
-    1. *'Veneto/data'*, which is of shape `(n, h, w)` where `n` is the total number of features in the data. The features include rock-type, rock-age, rock-family, and land cover classes. Refer to tables folder for more information about the features.
+    1. *'Veneto/data'*, which is of shape `(n, h, w)` where `n` is the total number of features in the data. The features include rock-type, rock-age, rock-family, and land cover classes. Refer to the *tables* folder for more information about the features.
     2. *'Veneto/gt'*, which includes landslide polygons that can be used as labels and is of shape `(1, h', w')`. This is a binary image; ones show landslides and zeros represent non-landslide points. Out of region areas have a negative value.
 2. Submit a request to download the DEM map by sending an email to `simone.tarquini@ingv.it` with subject *TINITALY DEM*.
 3. [Optional] Create a slope map based on the newly downloaded DEM using a GIS software.
