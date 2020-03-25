@@ -1,8 +1,10 @@
-import hdf5 as h5
+import h5py as h5
 import numpy as np
 import argparse
 import os
 from PIL import Image
+
+Image.MAX_IMAGE_PIXELS = 1e10
 
 def get_args():
     parser = argparse.ArgumentParser(description="Joining Data")
@@ -13,15 +15,19 @@ def get_args():
 def get_flags():
     _slope, _DEM = False, False
     img_names = os.listdir('images/')
-    if not ('slope' in img_names or 'DEM' in img_names):
+    # import ipdb; ipdb.set_trace()
+    if not ('slope.tif' in img_names or 'DEM.tif' in img_names):
         raise ValueError('There are no DEM or slope maps in the images folder!')
-    if 'slope' in img_names:
+    if 'slope.tif' in img_names:
         _slope = True
-    if 'DEM' in img_names:
+    if 'DEM.tif' in img_names:
         _DEM = True
     return _slope, _DEM
 
-def normalize(np_img):
+def normalize(np_img, _slope):
+    if _slope:
+        np_img[np_img<0]=0
+        np_img[np_img>180]=0
     mean = np.mean(np_img)
     std = np.std(np_img)
     np_img = (np_img - mean)/std
@@ -37,17 +43,22 @@ def join():
     newf.create_dataset('Veneto/data', (n+_slope+_DEM, h, w), dtype='f', compression='lzf')
     newf.create_dataset(
         'Veneto/gt',
-        (1, f['Veneto/gt'].shape[1], f['Veneto/gt'].shape[2])
+        (1, f['Veneto/gt'].shape[1], f['Veneto/gt'].shape[2]),
         dtype='f',
         compression='lzf'
     )
-    
+    # import ipdb; ipdb.set_trace() 
     if _slope:
-        newf['Veneto/data'][0] = normalize(np.array(Image.open('images/slope.tif')))
+        newf['Veneto/data'][0] = np.pad(normalize(np.array(Image.open('images/slope.tif')), _slope), ((64, 64), (64, 64+250)), mode='reflect')
         newf['Veneto/data'][1:1+n] = f['Veneto/data'][:]
+        f.close()
+        # ipdb.set_trace()
     if _DEM:
-        newf['Veneto/data'][-1] = normalize(np.array(Image.open('images/DEM.tif')))
-        newf['Veneto/data'][-1-n:-1] = f['Veneto/data'][:]
+        newf['Veneto/data'][-1] = np.pad(normalize(np.array(Image.open('images/DEM.tif')), _slope), ((64, 64), (64, 64+250)), mode='reflect')
+        if not _slope:
+            newf['Veneto/data'][-1-n:-1] = f['Veneto/data'][:]
+        # ipdb.set_trace()
+        f.close()
     
     newf['Veneto/gt'][:] = f['Veneto/gt'][:]
 
