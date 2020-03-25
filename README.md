@@ -33,12 +33,12 @@ For more information on hdf5 datasets, refer to http://docs.h5py.org/en/stable/.
 ## Creating the Dataset from Scratch (Not Recommended)
 You can also create the dataset from scratch. You need to have all the features that you want to use ready in one folder in .tif format to use this method. Refer to the *Raw Data Instructions* section about the instructions on how to download the data. The current `data_dict.json` file represents 94 features including slope, DEM, rock-type, rock-age, rock-family, and land cover with their corresponding feature numbers, showing their locations in the dataset. You need to update this file if you plan on not choosing some of the features or adding more features.
 
-## Requirements
+### Requirements
 * `numpy`
 * `h5py`
 * `PIL`
 
-#### Arguments
+### Arguments
 * `data_dir`: The path to the region's raw image files that we previously downloaded (In our case we only have one region that is Veneto).
 * `save_to`: The path to save the hdf5 dataset.
 * `feature_num`: The number of total features. The default value is 94 but you can use any number of features that you want.
@@ -46,19 +46,19 @@ You can also create the dataset from scratch. You need to have all the features 
 * `data_format`: The format of the rasters. The default value is '.tif' and is recommend to use.
 * `pad`: The number of pixels used to pad each side of the image. This padding number is used later for loading the data coherently but is not necessary to do. You can pass this to be zero if you do not want to pad your images.
 
-#### Run
+### Run
 To get the h5py dataset, simply pass the required arguments and call preprocess.py:
 
 `python3 preprocess.py --data_dir <path to raw data/rasters> --save_to <path to save the hdf5 dataset> --feature_num <feature_num> --shape <region_name,height,width> --data_format <data format> --pad <padding number>`
 
-## Raw Data Instructions
+### Raw Data Instructions
 There are three different parts of the data that need to downloaded and rasterized (in a .tif format).
 
-### Digital Elevation Model
+#### Digital Elevation Model
 To download the DEM map, you should send an email to `simone.tarquini@ingv.it` with the subject of TINITALY DEM. You will then
 receive an email giving the instructions on how to access the data with your own specific username and password. The DEM resolution is 10 meters. For more information on the data, refer to http://tinitaly.pi.ingv.it/.
 
-#### Terms and Conditions of Use:
+##### Terms and Conditions of Use:
 * Data is provided for research purposes only.
 * Data is provided solely to the person named on this application form and should not be given to third parties. 
 Third parties who might need access to the same dataset are required to fill their own application forms.
@@ -69,11 +69,11 @@ Third parties who might need access to the same dataset are required to fill the
 * The aim is to provide scientific information to members of national and international scientific communities. 
 The Istituto Nazionale di Geofisica e Vulcanologia assumes no responsibility for the downloaded data, which is not necessarily updated. The global accuracy of the digital elevation model is described in the above reference [1].
 
-### Land Cover
+#### Land Cover
 The CORINE land cover classification is used as land cover units in Veneto, Italy. To access the data
 please refer to https://land.copernicus.eu/user-corner/how-to-access-our-data. It is recommended to used first level land cover maps, consisting of agricultural areas, artificial surfaces, forest and semi-natural areas, water bodies, and wet lands. Each class should be a binary raster in .tif format. You can find more information about the features in the *tables* folder.
 
-#### Terms and Conditions of Use:
+##### Terms and Conditions of Use:
 The Copernicus programme is governed by Regulation (EU) No 377/2014 of the European Parliament and of the Council of 3 April 2014 establishing the Copernicus programme and repealing Regulation (EU) No 911/2010. Within the Copernicus programme, a portfolio of land monitoring activities has been delegated by the European Union to the EEA. The land monitoring products and services are made available through the Copernicus land portal on a principle of full, open and free access, as established by the Copernicus data and information policy Regulation (EU) No 1159/2013 of 12 July 2013.
 
 The Copernicus data and information policy is in line with the EEA policy of open and easy access to the data, 
@@ -81,24 +81,24 @@ information and applications derived from the activities described in its manage
 
 For more information, please refer to https://land.copernicus.eu/terms-of-use.
 
-### Bedrock Lithology
+#### Bedrock Lithology
 The bedrock lithology contains rock-age, rock-family, and rock-type features. These maps can be obtained from the freely available datasets of the Veneto region Geoportal. To download the data, refer to https://idt2.regione.veneto.it/. Each class should be a binary raster in .tif format. You can find more information about the features in the *tables* folder.
 
-#### Terms and Conditions of Use:
+##### Terms and Conditions of Use:
 All the Data and Services present in the Geoportal of the Veneto Region produced by the Regional Structures, 
 by instrumental Bodies of the Region or Local Bodies, are distributed according to the **Italian Open Data License v2.0**. For
 more information about the license, refer to https://www.dati.gov.it/content/italian-open-data-license-v20.
 
-### Landslide Polygons
+#### Landslide Polygons
 The landslides that are identified for Veneto are published as part of the IFFI project. The INSPIRE Natural Hazard Category
 Value code list was extended<sup>1</sup> to include the updated Varnes classification of landslide types, and the data are aligned to this standard.
 
 <sup>1</sup> http://minerva.codes/codelist/NaturalHazardCategoryLandslideExtension
 
-#### Reference:
+##### Reference:
 Hungr, O., Leroueil, S. & Picarelli, L. The Varnes classification of landslide types, an update. Landslides 11, 167–194 (2014). https://doi.org/10.1007/s10346-013-0436-y
 
-#### Terms and Conditions of Use:
+##### Terms and Conditions of Use:
 The data is free to use, modify, and share under CC BY-NC-SA 3.0 IT License. 
 For more information refere to https://creativecommons.org/licenses/by-nc-sa/3.0/it/deed.en.
 
