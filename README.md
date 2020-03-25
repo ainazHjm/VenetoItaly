@@ -105,6 +105,8 @@ To get the h5py dataset, simply pass the required arguments and call preprocess.
 
 `python3 preprocess.py --data_dir <path to raw data/rasters> --save_to <path to save the hdf5 dataset> --feature_num <feature_num> --shape <region_name,height,width> --data_format <data format> --pad <padding number>`
 
+**The hdf5 dataset contains feature maps in `[<RegionName>/data/]` and groundtruth/labels in `[<RegionName>/gt/]`. In this case, region name is Veneto.**
+
 ### Dist Dataset
 This dataset is specifically for the LACNN model proposed in paper: "Predicing Landslides Using Contour-Aligning Convolutional Neural Networks". Only create this dataset if you want to re-implement or build on the LACNN model. Otherwise, use the main dataset.
 
@@ -118,6 +120,9 @@ This dataset is specifically for the LACNN model proposed in paper: "Predicing L
 
 #### Run
 To create the dist dataset, simply run find_dist_features.py with the arguments specified in the arguments section. The code uses a lot of memory if the distances are big. The current code only contains masks for 30, 100, and 300 pixels (x10 meters). If your memory is below 32G, only run it with `--dist 30`.
+
+### Extra Links:
+Further documentation on how to use hdf5 with python: http://docs.h5py.org/en/stable/
 
 ## LICENSE
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc-sa/3.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/3.0/">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License</a>.
