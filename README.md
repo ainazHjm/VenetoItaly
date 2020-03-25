@@ -105,7 +105,7 @@ To get the h5py dataset, simply pass the required arguments and call preprocess.
 
 `python3 preprocess.py --data_dir <path to raw data/rasters> --save_to <path to save the hdf5 dataset> --feature_num <feature_num> --shape <region_name,height,width> --data_format <data format> --pad <padding number>`
 
-**The hdf5 dataset contains feature maps in `[<RegionName>/data]` and groundtruth/labels in `[<RegionName>/gt]`. In this case, region name is Veneto.**
+**The hdf5 dataset contains feature maps in `['<RegionName>/data']` and groundtruth/labels in `['<RegionName>/gt']`. In this case, region name is Veneto.**
 
 ### Dist Dataset
 This dataset is specifically for the LACNN model proposed in paper: "Predicing Landslides Using Contour-Aligning Convolutional Neural Networks". Only create this dataset if you want to re-implement or build on the LACNN model. Otherwise, use the main dataset.
