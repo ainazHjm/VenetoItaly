@@ -1,8 +1,6 @@
-# INSPIRE-Based Dataset for Predicting Landslides
+# Introducing a Dataset for Predicting Landslides
 
-This repository contains the instructions to download and create a dataset of hdf5 format that can be used to predict landslides.
-The raw data consists of land cover/land use, bedrock lithology (includes rock-type, rock-age, and rock-family), slope, digital elevation model (DEM),
-and landslide polygons (labels) for Veneto, a region in Italy. To learn more about INSPIRE, refer to https://inspire-geoportal.ec.europa.eu/.
+This repository contains the instructions to download and create a dataset of hdf5 format that can be used to predict landslides. The raw data consists of land cover/land use, bedrock lithology (includes rock-type, rock-age, and rock-family), slope, digital elevation model (DEM), and landslide polygons (labels) for Veneto, a region in Italy. We used INSPIRE terms to label different features that are used in this dataset. To learn more about INSPIRE, refer to https://inspire-geoportal.ec.europa.eu/.
 
 ## Step by Step Instructions (Recommended)
 
