@@ -91,9 +91,9 @@ more information about the license, refer to https://www.dati.gov.it/content/ita
 
 ### Landslide Polygons
 The landslides that are identified for Veneto are published as part of the IFFI project. The INSPIRE Natural Hazard Category
-Value code list was extended<sup>*</sup> to include the updated Varnes classification of landslide types, and the data are aligned to this standard.
+Value code list was extended<sup>1</sup> to include the updated Varnes classification of landslide types, and the data are aligned to this standard.
 
-<sup>*</sup> http://minerva.codes/codelist/NaturalHazardCategoryLandslideExtension
+<sup>1</sup> http://minerva.codes/codelist/NaturalHazardCategoryLandslideExtension
 
 #### Reference:
 Hungr, O., Leroueil, S. & Picarelli, L. The Varnes classification of landslide types, an update. Landslides 11, 167–194 (2014). https://doi.org/10.1007/s10346-013-0436-y
