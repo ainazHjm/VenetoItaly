@@ -11,7 +11,7 @@ This repository contains the instructions to download and create a dataset of hd
 1. Download the pre-proccessed dataset from https://drive.google.com/open?id=1tEqHF83ju1ccn3Z75vOXShIWmxVb84FF and extract it (it should be in hdf5 format).
 2. Submit a request to download the DEM map by sending an email to `simone.tarquini@ingv.it` with subject *TINITALY DEM*.
 3. [Optional] Create a slope map based on the newly downloaded DEM using a GIS software if you want to reproduce the exact dataset proposed in the paper: "Predicting Landslides Using Contour-Aligning Convolutional Neural Networks".
-4. Create a folder named 'images' in the project regpository and place DEM (& slope if you have it) in that folder. Rename it to `DEM.tif` (slope map to `slope.tif`) if it has another name.
+4. Create a folder named *images* in the project regpository and place DEM (& slope if you have it) in that folder. Rename it to `DEM.tif` (slope map to `slope.tif`) if it has another name.
 5. The maps should be in *.tif* format.
 6. Run the provided `script.py` with the downloaded dataset path as following:
 `python3 script.py --dataset_path <path to the downloaded dataset>`
@@ -28,7 +28,7 @@ The proposed dataset here, contains 94 different features that are labeled based
 
 The features with their corresponding feature numbers are stored in `data_dict.json`. You will find feature names such as *litho_44* in it; the number, in this case 44, corresponds to the INSPIRE code assigned to that type of rock, which can be found in the lithology table (`tables/Litho_rocktype_Lookup_Table.xlsx`). All feature names with their corresponding INSPIRE codes are available in the *tables* folder.
 
-## Further Details on Source Files for the Dataset
+## Further Details on Source Files
 In this section, we provide more information on source files for each type of feature in the dataset.
 
 ### Digital Elevation Model
