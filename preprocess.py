@@ -54,7 +54,7 @@ def process_data():
     data_dict = json.load(g)
     g.close()
     f = h5py.File(args.save_to, 'a')
-    
+    import ipdb;
     for data_path in args.data_dir:
         name = data_path.split('/')[-2]
         for n, h, w in args.shape:
@@ -69,28 +69,37 @@ def process_data():
                 print('created data and gt in %s' %name)
                 break
         f = initialize(f, name)
-
+        ipdb.set_trace()
     for data_path in args.data_dir:
         name = data_path.split('/')[-2]
         images = os.listdir(data_path)
+        ipdb.set_trace()
         for img in images:
             if args.data_format in img and not '.xml' in img and not 'gt' in img:
                 t = np.array(Image.open(data_path+img))
                 n_ = img.split('.')[0]
+                ipdb.set_trace()
                 if int(data_dict[n_]) == 0:
                     print('normalizing slope ...')
-                    t = normalize(t, 'slope')
+                    # t = normalize(t, 'slope')
+                    t = np.zeros((21005, 19250))
                 elif int(data_dict[n_]) == args.feature_num-1:
                     print('normalizing DEM')
-                    t = normalize(t, 'DEM')
+                    # t = normalize(t, 'DEM')
+                    
+                    t = np.zeros((21005, 19250))
                 print(data_dict[n_])
+                ipdb.set_trace()
                 t = np.pad(t, ((0, 0), (0, 250)), mode='reflect')
+                ipdb.set_trace()
                 f[name+'/data'][int(data_dict[n_])] = np.pad(
                     t,
                     ((args.pad, args.pad), (args.pad, args.pad)),
                     'reflect'
                 )
+                ipdb.set_trace()
         gt = np.array(Image.open(data_path+'gt'+args.data_format))
+        ipdb.set_trace()
         f[name+'/gt'][0] = np.pad(gt, ((0, 0), (0, 250)), mode='reflect')
 
     f.close()

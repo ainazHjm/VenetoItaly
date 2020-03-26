@@ -25,22 +25,27 @@ def get_flags():
     return _slope, _DEM
 
 def normalize(np_img, _slope):
+    import ipdb; ipdb.set_trace()
     if _slope:
         np_img[np_img<0]=0
         np_img[np_img>180]=0
     mean = np.mean(np_img)
     std = np.std(np_img)
-    np_img = np.pad(
-        (np_img - mean)/std,
+    ipdb.set_trace()
+    np_img = (np_img-mean)/std
+    ipdb.set_trace()
+    padded = np.pad(
+        np_img,
         ((0, 0), (0, 250)),
         mode='reflect'
     )
-    return np_img
+    ipdb.set_trace()
+    return padded
 
 def join():
     args = get_args()
     _slope, _DEM = get_flags()
-    
+    print(_slope, _DEM) 
     f = h5.File(args.dataset_path, 'a')
     # (n, h, w) = f['Veneto/data'].shape
     # newf = h5.File(args.save_to, 'w')
