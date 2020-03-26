@@ -1,53 +1,40 @@
-# Introducing a Dataset for Predicting Landslides
+# Introducing an INSPIRE Motivated Dataset for Predicting Landslides
 
 This repository contains the instructions to download and create a dataset of hdf5 format that can be used to predict landslides. The raw data consists of land cover/land use, bedrock lithology (includes rock-type, rock-age, and rock-family), slope, digital elevation model (DEM), and landslide polygons (labels) for Veneto, a region in Italy. We used INSPIRE terms to label different features that are used in this dataset. To learn more about INSPIRE, refer to https://inspire-geoportal.ec.europa.eu/.
 
-## Step by Step Instructions (Recommended)
-
-1. Download the pre-proccessed dataset from https://drive.google.com/open?id=1mCkOdh3kAR8JHnAvahXeoosBu5lvVKMS that is in hdf5 format. This dataset consists of two nested keys:
-    1. *'Veneto/data'*, which is of shape `(n, h, w)` where `n` is the total number of features in the data. The features include rock-type, rock-age, rock-family, and land cover classes. Refer to the *tables* folder for more information about the features.
-    2. *'Veneto/gt'*, which includes landslide polygons that can be used as labels and is of shape `(1, h', w')`. This is a binary image; ones show landslides and zeros represent non-landslide points. Out of region areas have a negative value.
-2. Submit a request to download the DEM map by sending an email to `simone.tarquini@ingv.it` with subject *TINITALY DEM*.
-3. [Optional] Create a slope map based on the newly downloaded DEM using a GIS software.
-4. Add the newly downloaded DEM to the current existing hdf5 dataset. If you get the slope map, you will need to add it to the dataset as well:
-    1. Create a new empty hdf5 dataset with the same keys (*'Veneto/data'* & *'Veneto/gt'*). The *data* part should have a shape of `(n+1, h, w)` if you only downloaded DEM otherwise, `(n+2, h, w)` to account for both slope and DEM. The *gt* part, ground truth, is the same shape as before.
-    2. Copy the *gt* from the previous dataset to the new created hdf5 dataset.
-    3. Depending on where you want to put DEM (or both DEM and slope) in the new hdf5 dataset, update the `data_dict.json` file so that it represents your features correctly. In the current existing file, slope is the first feature (0<sup>th</sup> index) and DEM is the last feature (93<sup>th</sup> index).    
-    4. After updating `data_dict.json`, copy DEM (or both DEM and slope) to its (their) corresponding position in the new hdf5 dataset. If the index for DEM is `i` in the json file, copy DEM to index `(i, h, w)` in the new hdf5 dataset.    
-    5. Copy the rest of the data from the previous hdf5 dataset to the new hdf5 dataset.
-    6. The new hdf5 dataset is now ready to be used in your experiments.
-
-For more information on hdf5 datasets, refer to http://docs.h5py.org/en/stable/. You will find feature names such as *litho_44* in `data_dict.json`; the number, in this case 44, corresponds to the INSPIRE code assigned to that type of rock. All feature names with their corresponding INSPIRE codes are available in the *tables* folder.
-
-## Creating the Dataset from Scratch (Not Recommended)
-You can also create the dataset from scratch. You need to have all the features that you want to use ready in one folder in .tif format to use this method. Refer to the *Raw Data Instructions* section about the instructions on how to download the data. The current `data_dict.json` file represents 94 features including slope, DEM, rock-type, rock-age, rock-family, and land cover with their corresponding feature numbers, showing their locations in the dataset. You need to update this file if you plan on not choosing some of the features or adding more features.
-
-### Requirements
+## Requirements
 * `numpy`
 * `h5py`
 * `PIL`
 
-### Arguments
-* `data_dir`: The path to the region's raw image files that we previously downloaded (In our case we only have one region that is Veneto).
-* `save_to`: The path to save the hdf5 dataset.
-* `feature_num`: The number of total features. The default value is 94 but you can use any number of features that you want.
-* `shape`: This argument is an array of form "name,height,width". "name" is the name of the region (e.g. Veneto), "height,width" represents the image shape (all maps/rasters should have the same shape).
-* `data_format`: The format of the rasters. The default value is '.tif' and is recommend to use.
-* `pad`: The number of pixels used to pad each side of the image. This padding number is used later for loading the data coherently but is not necessary to do. You can pass this to be zero if you do not want to pad your images.
+## Step by Step Instructions
+1. Download the pre-proccessed dataset from https://drive.google.com/open?id=1tEqHF83ju1ccn3Z75vOXShIWmxVb84FF and extract it (it should be in hdf5 format).
+2. Submit a request to download the DEM map by sending an email to `simone.tarquini@ingv.it` with subject *TINITALY DEM*.
+3. [Optional] Create a slope map based on the newly downloaded DEM using a GIS software if you want to reproduce the exact dataset proposed in the paper: "Predicting Landslides Using Contour-Aligning Convolutional Neural Networks".
+4. Create a folder named 'images' in the project regpository and place DEM (& slope if you have it) in that folder. Rename it to `DEM.tif` (slope map to `slope.tif`) if it has another name.
+5. The maps should be in *.tif* format.
+6. Run the provided `script.py` with the downloaded dataset path as following:
+`python3 script.py --dataset_path <path to the downloaded dataset>`
+7. Now, the downloaded dataset is rewritten and updated with the DEM map. You can use it in your experiments.
 
-### Run
-To get the h5py dataset, simply pass the required arguments and call preprocess.py:
+For more information on hdf5 datasets, refer to http://docs.h5py.org/en/stable/. 
 
-`python3 preprocess.py --data_dir <path to raw data/rasters> --save_to <path to save the hdf5 dataset> --feature_num <feature_num> --shape <region_name,height,width> --data_format <data format> --pad <padding number>`
+## Dataset Structure
+The dataset includes two nested key components:
+* *'Veneto/data'*, which is of shape `(n, h, w)` where `n` is the total number of features in the data.
+* *'Veneto/gt'*, which includes landslide polygons that can be used as labels and is of shape `(1, h', w')`. This is a binary image; ones show landslides and zeros represent non-landslide points. Out of region areas have a negative value.
 
-### Raw Data Instructions
-There are three different parts of the data that need to downloaded and rasterized (in a .tif format).
+The proposed dataset here, contains 94 different features that are labeled based on INSPIRE terms. Except DEM and slope, the rest of the features are binary features representing different classes in bedrock lithology (rock-type, rock-family, and rock-age) and land cover. The detailed information about these features can be found in their corresponding tables under the *tables* folder in the repository. If all the values for a feature are zero in the dataset, it means that feature does not exist in that particular region.
 
-#### Digital Elevation Model
-To download the DEM map, you should send an email to `simone.tarquini@ingv.it` with the subject of TINITALY DEM. You will then
-receive an email giving the instructions on how to access the data with your own specific username and password. The DEM resolution is 10 meters. For more information on the data, refer to http://tinitaly.pi.ingv.it/.
+The features with their corresponding feature numbers are stored in `data_dict.json`. You will find feature names such as *litho_44* in it; the number, in this case 44, corresponds to the INSPIRE code assigned to that type of rock, which can be found in the lithology table (`tables/Litho_rocktype_Lookup_Table.xlsx`). All feature names with their corresponding INSPIRE codes are available in the *tables* folder.
 
-##### Terms and Conditions of Use:
+## Further Details on Source Files for the Dataset
+In this section, we provide more information on source files for each type of feature in the dataset.
+
+### Digital Elevation Model
+The DEM map is downloaded by sending an email to `simone.tarquini@ingv.it` with the subject of TINITALY DEM. The resolution of the map is 10 meters. Refer to http://tinitaly.pi.ingv.it/ for more info.
+
+**Terms and Conditions of Use**:
 * Data is provided for research purposes only.
 * Data is provided solely to the person named on this application form and should not be given to third parties. 
 Third parties who might need access to the same dataset are required to fill their own application forms.
@@ -58,37 +45,25 @@ Third parties who might need access to the same dataset are required to fill the
 * The aim is to provide scientific information to members of national and international scientific communities. 
 The Istituto Nazionale di Geofisica e Vulcanologia assumes no responsibility for the downloaded data, which is not necessarily updated. The global accuracy of the digital elevation model is described in the above reference [1].
 
-#### Land Cover
-The CORINE land cover classification is used as land cover units in Veneto, Italy. To access the data
-please refer to https://land.copernicus.eu/user-corner/how-to-access-our-data. It is recommended to used first level land cover maps, consisting of agricultural areas, artificial surfaces, forest and semi-natural areas, water bodies, and wet lands. Each class should be a binary raster in .tif format. You can find more information about the features in the *tables* folder.
+### Land Cover
+The CORINE land cover classification is used as land cover units in Veneto, Italy. To access the source data
+please refer to https://land.copernicus.eu/user-corner/how-to-access-our-data.
 
-##### Terms and Conditions of Use:
-The Copernicus programme is governed by Regulation (EU) No 377/2014 of the European Parliament and of the Council of 3 April 2014 establishing the Copernicus programme and repealing Regulation (EU) No 911/2010. Within the Copernicus programme, a portfolio of land monitoring activities has been delegated by the European Union to the EEA. The land monitoring products and services are made available through the Copernicus land portal on a principle of full, open and free access, as established by the Copernicus data and information policy Regulation (EU) No 1159/2013 of 12 July 2013.
+**Terms and Conditions of Use**: The Copernicus programme is governed by Regulation (EU) No 377/2014 of the European Parliament and of the Council of 3 April 2014 establishing the Copernicus programme and repealing Regulation (EU) No 911/2010. Within the Copernicus programme, a portfolio of land monitoring activities has been delegated by the European Union to the EEA. The land monitoring products and services are made available through the Copernicus land portal on a principle of full, open and free access, as established by the Copernicus data and information policy Regulation (EU) No 1159/2013 of 12 July 2013. The Copernicus data and information policy is in line with the EEA policy of open and easy access to the data, 
+information and applications derived from the activities described in its management plan. For more information, please refer to https://land.copernicus.eu/terms-of-use.
 
-The Copernicus data and information policy is in line with the EEA policy of open and easy access to the data, 
-information and applications derived from the activities described in its management plan.
+### Bedrock Lithology
+The bedrock lithology contains rock-age, rock-family, and rock-type features. The source data can be obtained from the freely available datasets of the Veneto region Geoportal. To download the data, refer to https://idt2.regione.veneto.it/.
 
-For more information, please refer to https://land.copernicus.eu/terms-of-use.
+**Terms and Conditions of Use**: All the Data and Services present in the Geoportal of the Veneto Region produced by the Regional Structures, by instrumental Bodies of the Region or Local Bodies, are distributed according to the **Italian Open Data License v2.0**. For more information about the license, refer to https://www.dati.gov.it/content/italian-open-data-license-v20.
 
-#### Bedrock Lithology
-The bedrock lithology contains rock-age, rock-family, and rock-type features. These maps can be obtained from the freely available datasets of the Veneto region Geoportal. To download the data, refer to https://idt2.regione.veneto.it/. Each class should be a binary raster in .tif format. You can find more information about the features in the *tables* folder.
-
-##### Terms and Conditions of Use:
-All the Data and Services present in the Geoportal of the Veneto Region produced by the Regional Structures, 
-by instrumental Bodies of the Region or Local Bodies, are distributed according to the **Italian Open Data License v2.0**. For
-more information about the license, refer to https://www.dati.gov.it/content/italian-open-data-license-v20.
-
-#### Landslide Polygons
+### Landslide Polygons
 The landslides that are identified for Veneto are published as part of the IFFI project. The INSPIRE Natural Hazard Category
-Value code list was extended<sup>1</sup> to include the updated Varnes classification of landslide types, and the data are aligned to this standard.
+Value code list was extended (refer to http://minerva.codes/codelist/NaturalHazardCategoryLandslideExtension for more information) to include the updated Varnes classification of landslide types, and the data are aligned to this standard. 
 
-<sup>1</sup> http://minerva.codes/codelist/NaturalHazardCategoryLandslideExtension
+**Reference**: Hungr, O., Leroueil, S. & Picarelli, L. The Varnes classification of landslide types, an update. Landslides 11, 167–194 (2014). https://doi.org/10.1007/s10346-013-0436-y
 
-##### Reference:
-Hungr, O., Leroueil, S. & Picarelli, L. The Varnes classification of landslide types, an update. Landslides 11, 167–194 (2014). https://doi.org/10.1007/s10346-013-0436-y
-
-##### Terms and Conditions of Use:
-The data is free to use, modify, and share under CC BY-NC-SA 3.0 IT License. 
+**Terms and Conditions of Use**: The data is free to use, modify, and share under CC BY-NC-SA 3.0 IT License. 
 For more information refere to https://creativecommons.org/licenses/by-nc-sa/3.0/it/deed.en.
 
 ## LICENSE
