@@ -30,7 +30,11 @@ def normalize(np_img, _slope):
         np_img[np_img>180]=0
     mean = np.mean(np_img)
     std = np.std(np_img)
-    np_img = (np_img - mean)/std
+    np_img = np.pad(
+        (np_img - mean)/std,
+        ((0, 0), (0, 250)),
+        mode='reflect'
+    )
     return np_img
 
 def join():
@@ -49,12 +53,12 @@ def join():
     # )
     # import ipdb; ipdb.set_trace() 
     if _slope:
-        f['Veneto/data'][0] = np.pad(normalize(np.array(Image.open('images/slope.tif')), _slope), ((64, 64), (64, 64+250)), mode='reflect')
+        f['Veneto/data'][0] = np.pad(normalize(np.array(Image.open('images/slope.tif')), _slope), ((64, 64), (64, 64)), mode='reflect')
         # f['Veneto/data'][1:1+n] = f['Veneto/data'][:]
         # f.close()
         # ipdb.set_trace()
     if _DEM:
-        f['Veneto/data'][-1] = np.pad(normalize(np.array(Image.open('images/DEM.tif')), _slope), ((64, 64), (64, 64+250)), mode='reflect')
+        f['Veneto/data'][-1] = np.pad(normalize(np.array(Image.open('images/DEM.tif')), _slope), ((64, 64), (64, 64)), mode='reflect')
         # if not _slope:
         #     f['Veneto/data'][-1-n:-1] = f['Veneto/data'][:]
         # ipdb.set_trace()
