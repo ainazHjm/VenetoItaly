@@ -9,13 +9,11 @@ Image.MAX_IMAGE_PIXELS = 1e10
 def get_args():
     parser = argparse.ArgumentParser(description="Joining Data")
     parser.add_argument("--dataset_path", type=str, help="path to the h5 dataset")
-    # parser.add_argument("--save_to", type=str, help="path to save the new h5 dataset")
     return parser.parse_args()
 
 def get_flags():
     _slope, _DEM = False, False
     img_names = os.listdir('images/')
-    # import ipdb; ipdb.set_trace()
     if not ('slope.tif' in img_names or 'DEM.tif' in img_names):
         raise ValueError('There are no DEM or slope maps in the images folder!')
     if 'slope.tif' in img_names:
@@ -25,30 +23,24 @@ def get_flags():
     return _slope, _DEM
 
 def normalize(np_img, _slope, data_indices):
-    import ipdb; ipdb.set_trace()
     if _slope:
         np_img[np_img<0]=0
         np_img[np_img>180]=0
     mean = np.mean(np_img[data_indices])
     std = np.std(np_img[data_indices])
-    ipdb.set_trace()
     np_img = (np_img-mean)/std
-    ipdb.set_trace()
     padded = np.pad(
         np_img,
         ((0, 0), (0, 250)),
         mode='reflect'
     )
-    ipdb.set_trace()
     return padded
 
 def join():
     args = get_args()
     _slope, _DEM = get_flags()
-    print(_slope, _DEM) 
     f = h5.File(args.dataset_path, 'a')
     data_indices = f['Veneto/data'][2, 64:-64, 64:-314] >= 0
-
     if _slope:
         f['Veneto/data'][0] = np.pad(
             normalize(np.array(Image.open('images/slope.tif')), _slope, data_indices),
