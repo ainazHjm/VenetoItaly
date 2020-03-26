@@ -24,13 +24,13 @@ def get_flags():
         _DEM = True
     return _slope, _DEM
 
-def normalize(np_img, _slope):
+def normalize(np_img, _slope, data_indices):
     import ipdb; ipdb.set_trace()
     if _slope:
         np_img[np_img<0]=0
         np_img[np_img>180]=0
-    mean = np.mean(np_img)
-    std = np.std(np_img)
+    mean = np.mean(np_img[data_indices])
+    std = np.std(np_img[data_indices])
     ipdb.set_trace()
     np_img = (np_img-mean)/std
     ipdb.set_trace()
@@ -47,32 +47,21 @@ def join():
     _slope, _DEM = get_flags()
     print(_slope, _DEM) 
     f = h5.File(args.dataset_path, 'a')
-    # (n, h, w) = f['Veneto/data'].shape
-    # newf = h5.File(args.save_to, 'w')
-    # newf.create_dataset('Veneto/data', (n+_slope+_DEM, h, w), dtype='f', compression='lzf')
-    # newf.create_dataset(
-    #     'Veneto/gt',
-    #     (1, f['Veneto/gt'].shape[1], f['Veneto/gt'].shape[2]),
-    #     dtype='f',
-    #     compression='lzf'
-    # )
-    # import ipdb; ipdb.set_trace() 
-    if _slope:
-        f['Veneto/data'][0] = np.pad(normalize(np.array(Image.open('images/slope.tif')), _slope), ((64, 64), (64, 64)), mode='reflect')
-        # f['Veneto/data'][1:1+n] = f['Veneto/data'][:]
-        # f.close()
-        # ipdb.set_trace()
-    if _DEM:
-        f['Veneto/data'][-1] = np.pad(normalize(np.array(Image.open('images/DEM.tif')), _slope), ((64, 64), (64, 64)), mode='reflect')
-        # if not _slope:
-        #     f['Veneto/data'][-1-n:-1] = f['Veneto/data'][:]
-        # ipdb.set_trace()
-        # f.close()
-    
-    # f['Veneto/gt'][:] = f['Veneto/gt'][:]
+    data_indices = f['Veneto/data'][2] >= 0
 
+    if _slope:
+        f['Veneto/data'][0] = np.pad(
+            normalize(np.array(Image.open('images/slope.tif')), _slope, data_indices),
+            ((64, 64), (64, 64)),
+            mode='reflect'
+        )
+    if _DEM:
+        f['Veneto/data'][-1] = np.pad(
+            normalize(np.array(Image.open('images/DEM.tif')), _slope, data_indices),
+            ((64, 64), (64, 64)),
+            mode='reflect'
+        )
     f.close()
-    # newf.close()
     print('The new images are added to the dataset.')
 
 if __name__=='__main__':
