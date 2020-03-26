@@ -47,7 +47,7 @@ def join():
     _slope, _DEM = get_flags()
     print(_slope, _DEM) 
     f = h5.File(args.dataset_path, 'a')
-    data_indices = f['Veneto/data'][2] >= 0
+    data_indices = f['Veneto/data'][2, 64:-64, 64:-314] >= 0
 
     if _slope:
         f['Veneto/data'][0] = np.pad(
