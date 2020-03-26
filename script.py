@@ -9,7 +9,7 @@ Image.MAX_IMAGE_PIXELS = 1e10
 def get_args():
     parser = argparse.ArgumentParser(description="Joining Data")
     parser.add_argument("--dataset_path", type=str, help="path to the h5 dataset")
-    parser.add_argument("--save_to", type=str, help="path to save the new h5 dataset")
+    # parser.add_argument("--save_to", type=str, help="path to save the new h5 dataset")
     return parser.parse_args()
 
 def get_flags():
@@ -37,34 +37,34 @@ def join():
     args = get_args()
     _slope, _DEM = get_flags()
     
-    f = h5.File(args.dataset_path, 'r')
-    (n, h, w) = f['Veneto/data'].shape
-    newf = h5.File(args.save_to, 'w')
-    newf.create_dataset('Veneto/data', (n+_slope+_DEM, h, w), dtype='f', compression='lzf')
-    newf.create_dataset(
-        'Veneto/gt',
-        (1, f['Veneto/gt'].shape[1], f['Veneto/gt'].shape[2]),
-        dtype='f',
-        compression='lzf'
-    )
+    f = h5.File(args.dataset_path, 'a')
+    # (n, h, w) = f['Veneto/data'].shape
+    # newf = h5.File(args.save_to, 'w')
+    # newf.create_dataset('Veneto/data', (n+_slope+_DEM, h, w), dtype='f', compression='lzf')
+    # newf.create_dataset(
+    #     'Veneto/gt',
+    #     (1, f['Veneto/gt'].shape[1], f['Veneto/gt'].shape[2]),
+    #     dtype='f',
+    #     compression='lzf'
+    # )
     # import ipdb; ipdb.set_trace() 
     if _slope:
-        newf['Veneto/data'][0] = np.pad(normalize(np.array(Image.open('images/slope.tif')), _slope), ((64, 64), (64, 64+250)), mode='reflect')
-        newf['Veneto/data'][1:1+n] = f['Veneto/data'][:]
-        f.close()
+        f['Veneto/data'][0] = np.pad(normalize(np.array(Image.open('images/slope.tif')), _slope), ((64, 64), (64, 64+250)), mode='reflect')
+        # f['Veneto/data'][1:1+n] = f['Veneto/data'][:]
+        # f.close()
         # ipdb.set_trace()
     if _DEM:
-        newf['Veneto/data'][-1] = np.pad(normalize(np.array(Image.open('images/DEM.tif')), _slope), ((64, 64), (64, 64+250)), mode='reflect')
-        if not _slope:
-            newf['Veneto/data'][-1-n:-1] = f['Veneto/data'][:]
+        f['Veneto/data'][-1] = np.pad(normalize(np.array(Image.open('images/DEM.tif')), _slope), ((64, 64), (64, 64+250)), mode='reflect')
+        # if not _slope:
+        #     f['Veneto/data'][-1-n:-1] = f['Veneto/data'][:]
         # ipdb.set_trace()
-        f.close()
+        # f.close()
     
-    newf['Veneto/gt'][:] = f['Veneto/gt'][:]
+    # f['Veneto/gt'][:] = f['Veneto/gt'][:]
 
     f.close()
-    newf.close()
-    print('The new dataset is created in %s.' %args.save_to)
+    # newf.close()
+    print('The new images are added to the dataset.')
 
 if __name__=='__main__':
     join()
