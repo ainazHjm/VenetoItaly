@@ -1,4 +1,4 @@
-# Introducing an INSPIRE Motivated Dataset for Predicting Landslides
+# An INSPIRE Motivated Dataset for Predicting Landslides
 
 This repository contains the instructions to download and create a dataset of hdf5 format that can be used to predict landslides. The raw data consists of land cover/land use, bedrock lithology (includes rock-type, rock-age, and rock-family), slope, digital elevation model (DEM), and landslide polygons (labels) for Veneto, a region in Italy. We used INSPIRE terms to label different features that are used in this dataset. To learn more about INSPIRE, refer to https://inspire-geoportal.ec.europa.eu/.
 
@@ -64,6 +64,12 @@ Value code list was extended (refer to http://minerva.codes/codelist/NaturalHa
 
 **Terms and Conditions of Use**: The data is free to use, modify, and share under CC BY-NC-SA 3.0 IT License. 
 For more information refere to https://creativecommons.org/licenses/by-nc-sa/3.0/it/deed.en.
+
+## Citation
+This repository is part of the research project: "Predicting Landslides Using Contour Aligning Convolutional Neural Networks, A. Hajimoradlou, G. Roberti, and D. Poole". Please cite our project, if you use the data provided here in your work.
+
+### Links
+https://arxiv.org/abs/1911.04651
 
 ## LICENSE
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc-sa/3.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/3.0/">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License</a>.
