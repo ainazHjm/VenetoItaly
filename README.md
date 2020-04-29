@@ -66,7 +66,7 @@ Value code list was extended (refer to http://minerva.codes/codelist/NaturalHa
 For more information refere to https://creativecommons.org/licenses/by-nc-sa/3.0/it/deed.en.
 
 ## Citation
-This repository is part of the research project: "Predicting Landslides Using Contour Aligning Convolutional Neural Networks, A. Hajimoradlou, G. Roberti, and D. Poole". Please cite our project, if you use the data provided here in your work.
+This repository is part of the research project: "Predicting Landslides Using Locally Aligned Convolutional Neural Networks, A. Hajimoradlou, G. Roberti, and D. Poole". Please cite our project, if you use the data provided here in your work.
 
 **Links**:
  - https://arxiv.org/abs/1911.04651
